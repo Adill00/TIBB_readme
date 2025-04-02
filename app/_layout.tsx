@@ -6,6 +6,8 @@ import { StatusBar } from 'expo-status-bar';
 import { useEffect } from 'react';
 import { Button, View, StyleSheet } from 'react-native';
 import 'react-native-reanimated';
+import { Logger } from '@/utils/logger';
+import { ApiClient } from '@/middleware/apiClient';
 
 import { useColorScheme } from '@/hooks/useColorScheme';
 
@@ -29,32 +31,24 @@ export default function RootLayout() {
     return null;
   }
 
-  const handleSpotifyFetch = () => {
-    fetch("https://api.spotify.com/v1/deprecated-endpoint")
-      .then((response) => {
-        if (!response.ok) {
-          console.warn("API for Spotify is deprecated, use Deezer instead");
-        }
-      })
-      .catch(() => {
-        console.warn("API for Spotify is deprecated, use Deezer instead");
-      });
+  const handleSpotifyFetch = async () => {
+    try {
+      const response = await fetch("https://api.spotify.com/v1/deprecated-endpoint");
+      if (!response.ok) {
+        Logger.warn("API for Spotify is deprecated, use Deezer instead");
+      }
+    } catch (error) {
+      Logger.error("Spotify API fetch failed", error);
+    }
   };
 
-  const handleDeezerFetch = () => {
-    console.log("Starting Deezer API call...");
-
-    fetch("https://api.deezer.com/user/2529")
-      .then(() => {
-        console.log("Deezer API call completed.");
-
-        setTimeout(() => {
-          console.info("Data successfully fetched");
-        }, 1000);
-      })
-      .catch((error) => {
-        console.error("Error during Deezer API call:", error);
-      });
+  const handleDeezerFetch = async () => {
+    try {
+      const data = await ApiClient.request("https://api.deezer.com/user/2529");
+      Logger.info("Deezer API response received", data);
+    } catch (error) {
+      Logger.error("Error fetching Deezer data", error);
+    }
   };
 
   const handleFetchMore = () => {
